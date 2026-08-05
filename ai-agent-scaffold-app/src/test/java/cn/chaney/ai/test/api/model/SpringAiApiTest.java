@@ -16,7 +16,7 @@ public class SpringAiApiTest {
     public static void main(String[] args) {
         OpenAiApi openAiApi = OpenAiApi.builder()
                 .baseUrl("https://apis.itedus.cn/")
-                .apiKey("sk-wtBOjyNviG9NtbYn7f2fF8A2203048Aa86Be6f0f0b824dB9")
+                .apiKey(System.getenv().getOrDefault("AI_API_KEY", "your-api-key"))
                 .completionsPath("v1/chat/completions")
                 .embeddingsPath("v1/embeddings")
                 .build();
