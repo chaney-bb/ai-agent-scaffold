@@ -1,0 +1,30 @@
+26-08-04.16:19:18.727 [main            ] INFO  Application            - Starting Application using Java 17.0.12 with PID 13636 (D:\javaproject\chaney-agent\ai-agent-scaffold\ai-agent-scaffold-app\target\classes started by chaney in D:\javaproject\chaney-agent\ai-agent-scaffold)
+26-08-04.16:19:18.728 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-08-04.16:19:19.325 [main            ] WARN  ClassPathMapperScanner - No MyBatis mapper was found in '[cn.chaney.ai]' package. Please check your configuration.
+26-08-04.16:19:19.654 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-08-04.16:19:19.665 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-08-04.16:19:19.666 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-08-04.16:19:19.667 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-08-04.16:19:19.709 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-08-04.16:19:19.709 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 949 ms
+26-08-04.16:19:19.833 [main            ] INFO  OptionalValidatorFactoryBean - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+26-08-04.16:19:20.202 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-08-04.16:19:20.217 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-08-04.16:19:20.225 [main            ] INFO  Application            - Started Application in 2.324 seconds (process running for 3.014)
+26-08-04.16:19:41.831 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-08-04.16:19:41.914 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-08-04.16:23:03.766 [main            ] INFO  Application            - Starting Application using Java 17.0.12 with PID 14368 (D:\javaproject\chaney-agent\ai-agent-scaffold\ai-agent-scaffold-app\target\classes started by chaney in D:\javaproject\chaney-agent\ai-agent-scaffold)
+26-08-04.16:23:03.769 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-08-04.16:23:04.314 [main            ] WARN  ClassPathMapperScanner - No MyBatis mapper was found in '[cn.chaney.ai]' package. Please check your configuration.
+26-08-04.16:23:04.674 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-08-04.16:23:04.686 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-08-04.16:23:04.687 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-08-04.16:23:04.687 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-08-04.16:23:04.727 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-08-04.16:23:04.728 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 907 ms
+26-08-04.16:23:04.848 [main            ] INFO  OptionalValidatorFactoryBean - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+26-08-04.16:23:05.185 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-08-04.16:23:05.198 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-08-04.16:23:05.206 [main            ] INFO  Application            - Started Application in 2.039 seconds (process running for 2.546)
+26-08-04.16:23:18.961 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-08-04.16:23:19.046 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete

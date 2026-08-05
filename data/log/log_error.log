@@ -1,0 +1,2 @@
+26-08-04.16:19:19.325 [main            ] WARN  ClassPathMapperScanner - No MyBatis mapper was found in '[cn.chaney.ai]' package. Please check your configuration.
+26-08-04.16:23:04.314 [main            ] WARN  ClassPathMapperScanner - No MyBatis mapper was found in '[cn.chaney.ai]' package. Please check your configuration.
