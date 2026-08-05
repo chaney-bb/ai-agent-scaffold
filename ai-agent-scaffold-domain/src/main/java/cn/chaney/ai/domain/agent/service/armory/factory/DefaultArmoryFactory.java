@@ -4,6 +4,7 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import cn.chaney.ai.domain.agent.model.entity.ArmoryCommandEntity;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.node.RootNode;
+import com.google.adk.agents.BaseAgent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,9 +45,14 @@ public class DefaultArmoryFactory {
         private OpenAiApi openAiApi;
 
         /**
-         * LLM ChatModel
+         * LLM ChatModel（ChatModelNode 写入）
          */
         private ChatModel chatModel;
+
+        /**
+         * 已装配的智能体：key = Agent.name，value = LlmAgent（基类 BaseAgent）
+         */
+        private Map<String, BaseAgent> agentGroup = new HashMap<>();
 
         private Map<String, Object> dataObjects = new HashMap<>();
 
