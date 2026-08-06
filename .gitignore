@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Local runtime / secrets ###
+# 应用运行日志（勿提交）
+**/data/
+# 本地覆盖配置（含密钥时用此命名，勿提交）
+**/application-local.yml
+**/*-local.yml
