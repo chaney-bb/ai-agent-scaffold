@@ -2,6 +2,7 @@ package cn.chaney.ai.domain.agent.service.armory.factory;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import cn.chaney.ai.domain.agent.model.entity.ArmoryCommandEntity;
+import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.node.RootNode;
 import com.google.adk.agents.BaseAgent;
@@ -14,7 +15,9 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,6 +56,9 @@ public class DefaultArmoryFactory {
          * 已装配的智能体：key = Agent.name，value = LlmAgent（基类 BaseAgent）
          */
         private Map<String, BaseAgent> agentGroup = new HashMap<>();
+
+        /** 工作流配置列表（AgentWorkflowNode 写入，子流转节点读取） */
+        private List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = new ArrayList<>();
 
         private Map<String, Object> dataObjects = new HashMap<>();
 

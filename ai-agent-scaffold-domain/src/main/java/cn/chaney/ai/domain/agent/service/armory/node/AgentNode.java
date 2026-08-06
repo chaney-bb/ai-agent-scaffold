@@ -51,7 +51,7 @@ public class AgentNode extends AbstractArmorySupport {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 本节链暂止，后续再接工作流等节点
+        // 与学习项目 2-8 一致：本节暂不接到 AgentWorkflowNode，后续再接
         return defaultStrategyHandler;
     }
 }
