@@ -15,7 +15,7 @@ import javax.annotation.Resource;
 
 /**
  * @author chaney
- * @description
+ * @description 装配 OpenAiApi（baseUrl + completionsPath 由厂商兼容地址决定，勿重复叠 v1）
  * @create 2026/8/5 18:07
  */
 @Slf4j
@@ -27,12 +27,12 @@ public class AiApiNode extends AbstractArmorySupport {
 
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 编写 AiApi 构建
         log.info("Ai Agent 装配操作 - AiApiNode");
 
         AiAgentConfigTableVO aiAgentConfigTableVO = requestParameter.getAiAgentConfigTableVO();
         AiAgentConfigTableVO.Module.AiApi aiApiConfig = aiAgentConfigTableVO.getModule().getAiApi();
 
+        // 空 path 会回退默认 v1/chat/completions；若 baseUrl 已含 /v1，应显式写 /chat/completions
         OpenAiApi openAiApi = OpenAiApi.builder()
                 .baseUrl(aiApiConfig.getBaseUrl())
                 .apiKey(aiApiConfig.getApiKey())
@@ -41,13 +41,11 @@ public class AiApiNode extends AbstractArmorySupport {
                 .build();
 
         dynamicContext.setOpenAiApi(openAiApi);
-        // 路由到下一个节点，如果不需要路由了，可以 return 返回结果
         return router(requestParameter, dynamicContext);
     }
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // router 后由框架调 get，流转到 ChatModelNode
         return chatModelNode;
     }
 }

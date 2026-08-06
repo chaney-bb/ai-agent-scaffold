@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author chaney
- * @description
+ * @description 装配服务：按配置表逐个走规则树，注册可对话的 Agent
  * @create 2026/8/5 18:06
  */
 @Slf4j
@@ -25,8 +25,10 @@ public class ArmoryService implements IArmoryService {
 
     @Override
     public void acceptArmoryAgents(List<AiAgentConfigTableVO> tables) throws Exception {
+        // tables 可有多项 → 多个主入口（各自 agentId / Runner），彼此默认隔离
         for (AiAgentConfigTableVO table : tables) {
             StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> handler = defaultArmoryFactory.armoryStrategyHandler();
+            // 每次 new DynamicContext，从 RootNode 跑完整装配链
             handler.apply(
                     ArmoryCommandEntity.builder()
                             .aiAgentConfigTableVO(table)
