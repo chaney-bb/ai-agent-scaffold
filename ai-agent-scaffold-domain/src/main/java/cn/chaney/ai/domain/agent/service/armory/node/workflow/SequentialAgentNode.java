@@ -6,21 +6,27 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.AbstractArmorySupport;
 import cn.chaney.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
+import cn.chaney.ai.domain.agent.service.armory.node.RunnerNode;
 import com.google.adk.agents.BaseAgent;
 import com.google.adk.agents.SequentialAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
  * @author chaney
- * @description Sequential 装配节点：组装串行总入口，并发布到 Spring；本期装配链终点
+ * @description Sequential 装配节点：组装串行 Agent，再流转到 RunnerNode
  * @create 2026/8/6 14:35
  */
 @Slf4j
 @Service("sequentialAgentNode")
 public class SequentialAgentNode extends AbstractArmorySupport {
+
+    /** 下一跳：用本节点产出的 SequentialAgent 构建 InMemoryRunner */
+    @Resource
+    private RunnerNode runnerNode;
 
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
@@ -40,8 +46,10 @@ public class SequentialAgentNode extends AbstractArmorySupport {
                         .subAgents(subAgents)
                         .build();
 
-        // 写回上下文；同时作为流水线根 Agent 注册到 Spring，供后续查找/运行
+        // 写回 agentGroup；并单独留给 RunnerNode 使用
         dynamicContext.getAgentGroup().put(agentWorkflow.getName(), sequentialAgent);
+        dynamicContext.setSequentialAgent(sequentialAgent);
+
         registerBean(agentWorkflow.getName(), SequentialAgent.class, sequentialAgent);
 
         return router(requestParameter, dynamicContext);
@@ -49,7 +57,6 @@ public class SequentialAgentNode extends AbstractArmorySupport {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 本期不继续互跳，装配链在此结束（Runner 等后续课时再接）
-        return defaultStrategyHandler;
+        return runnerNode;
     }
 }

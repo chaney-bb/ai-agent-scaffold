@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,6 +23,11 @@ import java.util.List;
 @Slf4j
 @Service
 public class AgentNode extends AbstractArmorySupport {
+
+    /** 下一跳：工作流编排（Loop / Parallel / Sequential） */
+    @Resource
+    private AgentWorkflowNode agentWorkflowNode;
+
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
         log.info("Ai Agent 装配操作 - AgentNode");
@@ -51,7 +57,6 @@ public class AgentNode extends AbstractArmorySupport {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 与学习项目 2-8 一致：本节暂不接到 AgentWorkflowNode，后续再接
-        return defaultStrategyHandler;
+        return agentWorkflowNode;
     }
 }

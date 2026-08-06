@@ -6,6 +6,7 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.node.RootNode;
 import com.google.adk.agents.BaseAgent;
+import com.google.adk.agents.SequentialAgent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,6 +49,11 @@ public class DefaultArmoryFactory {
          * LLM ChatModel（ChatModelNode 写入）
          */
         private ChatModel chatModel;
+
+        /**
+         * 当前装配出的串行总 Agent（SequentialAgentNode 写入，RunnerNode 读取）
+         */
+        private SequentialAgent sequentialAgent;
 
         /**
          * 已装配的智能体：key = Agent.name，value = LlmAgent / 工作流 Agent（基类 BaseAgent）
