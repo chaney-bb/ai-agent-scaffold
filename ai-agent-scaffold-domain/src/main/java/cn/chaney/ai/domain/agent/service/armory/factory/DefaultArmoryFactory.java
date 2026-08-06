@@ -15,10 +15,7 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author chaney
@@ -53,11 +50,11 @@ public class DefaultArmoryFactory {
         private ChatModel chatModel;
 
         /**
-         * 已装配的智能体：key = Agent.name，value = LlmAgent（基类 BaseAgent）
+         * 已装配的智能体：key = Agent.name，value = LlmAgent / 工作流 Agent（基类 BaseAgent）
          */
         private Map<String, BaseAgent> agentGroup = new HashMap<>();
 
-        /** 工作流配置列表（AgentWorkflowNode 写入，子流转节点读取） */
+        /** 工作流配置列表（AgentWorkflowNode 写入，子节点 remove(0) 逐项消费） */
         private List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = new ArrayList<>();
 
         private Map<String, Object> dataObjects = new HashMap<>();
@@ -68,6 +65,24 @@ public class DefaultArmoryFactory {
 
         public <T> T getValue(String key) {
             return (T) dataObjects.get(key);
+        }
+
+        /**
+         * 按 subAgents 名称从 agentGroup 取已装配实例；找不到则跳过（不自动创建，依赖配置拓扑序）
+         */
+        public List<BaseAgent> queryAgentList(List<String> agentNames) {
+            if (agentNames == null || agentNames.isEmpty() || agentGroup == null) {
+                return Collections.emptyList();
+            }
+
+            List<BaseAgent> agents = new ArrayList<>();
+            for (String name : agentNames) {
+                BaseAgent agent = agentGroup.get(name);
+                if (agent != null) {
+                    agents.add(agent);
+                }
+            }
+            return agents;
         }
 
     }

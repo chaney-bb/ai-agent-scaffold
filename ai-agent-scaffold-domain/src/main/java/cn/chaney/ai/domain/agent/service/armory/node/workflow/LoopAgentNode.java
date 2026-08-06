@@ -7,6 +7,8 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.model.valobj.enums.AgentTypeEnum;
 import cn.chaney.ai.domain.agent.service.armory.AbstractArmorySupport;
 import cn.chaney.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
+import com.google.adk.agents.BaseAgent;
+import com.google.adk.agents.LoopAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,7 @@ import java.util.List;
 
 /**
  * @author chaney
- * @description Loop 装配节点（本节只做流转骨架，业务装配后续再写）
+ * @description Loop 装配节点：组装 LoopAgent，可再跳 Parallel / Sequential
  * @create 2026/8/6 14:35
  */
 @Slf4j
@@ -23,8 +25,27 @@ public class LoopAgentNode extends AbstractArmorySupport {
 
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 本节占位：后续在此组装 LoopAgent
-        return null;
+        log.info("Ai Agent 装配操作 - LoopAgentNode");
+
+        // 消费列表首项配置
+        List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = dynamicContext.getAgentWorkflows();
+        AiAgentConfigTableVO.Module.AgentWorkflow agentWorkflow = agentWorkflows.remove(0);
+
+        // 按 subAgents 名取已装配的子 Agent（须已在 agentGroup 中）
+        List<BaseAgent> subAgents = dynamicContext.queryAgentList(agentWorkflow.getSubAgents());
+
+        LoopAgent loopAgent =
+                LoopAgent.builder()
+                        .name(agentWorkflow.getName())
+                        .description(agentWorkflow.getDescription())
+                        .subAgents(subAgents)
+                        .maxIterations(agentWorkflow.getMaxIterations())
+                        .build();
+
+        // 写回上下文，供后续工作流按 name 引用
+        dynamicContext.getAgentGroup().put(agentWorkflow.getName(), loopAgent);
+
+        return router(requestParameter, dynamicContext);
     }
 
     @Override

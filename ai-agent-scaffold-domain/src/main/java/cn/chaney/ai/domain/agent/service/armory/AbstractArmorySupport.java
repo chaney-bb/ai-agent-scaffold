@@ -6,6 +6,9 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Resource;
@@ -28,6 +31,24 @@ public abstract class AbstractArmorySupport extends AbstractMultiThreadStrategyR
     @Override
     protected void multiThread(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws ExecutionException, InterruptedException, TimeoutException {
         // 空处理：子节点不是都需要异步预加载
+    }
+
+    /**
+     * 将运行时装配出的实例动态注册进 Spring（如同名已存在则先移除再注册）
+     */
+    protected synchronized <T> void registerBean(String beanName, Class<T> beanClass, T beanInstance) {
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
+
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass, () -> beanInstance);
+        BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
+        beanDefinition.setScope(BeanDefinition.SCOPE_SINGLETON);
+
+        if (beanFactory.containsBeanDefinition(beanName)) {
+            beanFactory.removeBeanDefinition(beanName);
+        }
+
+        beanFactory.registerBeanDefinition(beanName, beanDefinition);
+        log.info("成功注册Bean: {}", beanName);
     }
 
     /** 按 Bean 名从容器取实例 */
