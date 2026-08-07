@@ -18,21 +18,21 @@ import java.util.List;
 
 /**
  * @author chaney
- * @description 工作流主流转：有 workflow 则分发；无则直接短路到 RunnerNode（支持单体 Agent）
+ * @description 工作流星型分发中心：按步骤取出当前 workflow，分发到 Loop/Parallel/Sequential；装完一项后子节点再回到本节点
  * @create 2026/8/6 14:28
  */
 @Slf4j
 @Service
 public class AgentWorkflowNode extends AbstractArmorySupport {
 
-    // 单向依赖，可直接注入；兄弟节点互跳见 Loop/Parallel 的 getBean
+    /** 单向依赖，可直接注入；子节点装完后通过 getBean 回到本节点，避免互跳 */
     @Resource
     private LoopAgentNode loopAgentNode;
     @Resource
     private ParallelAgentNode parallelAgentNode;
     @Resource
     private SequentialAgentNode sequentialAgentNode;
-    /** 未配置 agent-workflows 时直达 Runner */
+    /** 无待处理 workflow 时直达 Runner */
     @Resource
     private RunnerNode runnerNode;
 
@@ -43,28 +43,31 @@ public class AgentWorkflowNode extends AbstractArmorySupport {
         AiAgentConfigTableVO aiAgentConfigTableVO = requestParameter.getAiAgentConfigTableVO();
         List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = aiAgentConfigTableVO.getModule().getAgentWorkflows();
 
-        // 无 workflow：不写上下文，直接 router → get() 返回 runnerNode
-        if (null == agentWorkflows || agentWorkflows.isEmpty()) {
+        // 未配置 / 已全部装完：清空当前项，router → get() 进 RunnerNode
+        if (null == agentWorkflows || agentWorkflows.isEmpty()
+                || dynamicContext.getCurrentStepIndex() >= agentWorkflows.size()) {
+            dynamicContext.setCurrentAgentWorkflow(null);
             return router(requestParameter, dynamicContext);
         }
 
-        // 供后续 Loop / Parallel / Sequential 节点读取
-        dynamicContext.setAgentWorkflows(agentWorkflows);
+        // 取出第 N 项写入上下文，供子节点只读装配
+        dynamicContext.setCurrentAgentWorkflow(agentWorkflows.get(dynamicContext.getCurrentStepIndex()));
+        dynamicContext.addCurrentStepIndex();
 
         return router(requestParameter, dynamicContext);
     }
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = dynamicContext.getAgentWorkflows();
+        AiAgentConfigTableVO.Module.AgentWorkflow currentAgentWorkflow = dynamicContext.getCurrentAgentWorkflow();
 
-        // 空列表：跳过 Loop/Parallel/Sequential，进 Runner（由 runner.agent-name 指定入口 Agent）
-        if (null == agentWorkflows || agentWorkflows.isEmpty()) {
+        // null：没有下一项，进入 Runner（由 runner.agent-name 指定入口）
+        if (null == currentAgentWorkflow) {
             return runnerNode;
         }
 
-        // 取列表首项 type，决定进入哪种工作流装配节点
-        String type = agentWorkflows.get(0).getType();
+        // 按当前项 type 分发到对应装配节点
+        String type = currentAgentWorkflow.getType();
         AgentTypeEnum agentTypeEnum = AgentTypeEnum.formType(type);
 
         if (null == agentTypeEnum) {
@@ -76,7 +79,7 @@ public class AgentWorkflowNode extends AbstractArmorySupport {
             case "loopAgentNode" -> loopAgentNode;
             case "parallelAgentNode" -> parallelAgentNode;
             case "sequentialAgentNode" -> sequentialAgentNode;
-            default -> defaultStrategyHandler;
+            default -> runnerNode;
         };
     }
 }

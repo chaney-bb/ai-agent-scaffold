@@ -57,6 +57,27 @@ public class AiAgentAutoConfigTest {
         // 故意挂起，便于观察日志（非断言需要）
         new CountDownLatch(1).await();
     }
+    /** 第 2-13 节：并行研究管道 parallel_research_app（agent-id=100002，parallel → sequential 星型分发） */
+    @Test
+    public void test_handlerMessage_02() {
+        AiAgentRegisterVO aiAgentRegisterVO = applicationContext.getBean("100002", AiAgentRegisterVO.class);
+
+        String appName = aiAgentRegisterVO.getAppName();
+        InMemoryRunner runner = aiAgentRegisterVO.getRunner();
+
+        Session session = runner.sessionService()
+                .createSession(appName, "xiaofuge")
+                .blockingGet();
+
+        Content userMsg = Content.fromParts(Part.fromText("你具备哪些能力"));
+        Flowable<Event> events = runner.runAsync("xiaofuge", session.id(), userMsg);
+
+        List<String> outputs = new ArrayList<>();
+        events.blockingForEach(event -> outputs.add(event.stringifyContent()));
+
+        log.info("测试结果:{}", JSON.toJSONString(outputs));
+    }
+
     /** 第 2-12 节：验证单体智能体 only-one-agent（agent-id=100003，无 agent-workflows） */
     @Test
     public void test_handlerMessage_03() {

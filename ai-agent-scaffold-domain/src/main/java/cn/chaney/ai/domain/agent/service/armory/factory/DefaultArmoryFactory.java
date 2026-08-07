@@ -6,7 +6,6 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.node.RootNode;
 import com.google.adk.agents.BaseAgent;
-import com.google.adk.agents.SequentialAgent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author chaney
@@ -50,15 +50,21 @@ public class DefaultArmoryFactory {
          */
         private ChatModel chatModel;
 
-
         /**
          * 已装配的智能体：key = Agent.name，value = LlmAgent / 工作流 Agent（基类 BaseAgent）
          * RunnerNode 按 runner.agent-name 从此 Map 取入口 Agent
          */
         private Map<String, BaseAgent> agentGroup = new HashMap<>();
 
-        /** 工作流配置列表（AgentWorkflowNode 写入，子节点 remove(0) 逐项消费） */
-        private List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = new ArrayList<>();
+        /**
+         * 当前待装配的 workflow 配置项（由 AgentWorkflowNode 按步骤写入）
+         */
+        private AiAgentConfigTableVO.Module.AgentWorkflow currentAgentWorkflow;
+
+        /**
+         * 已推进的 workflow 步骤下标（装完一项 +1；用于从配置列表取下一项）
+         */
+        private AtomicInteger currentStepIndex = new AtomicInteger(0);
 
         private Map<String, Object> dataObjects = new HashMap<>();
 
@@ -86,6 +92,15 @@ public class DefaultArmoryFactory {
                 }
             }
             return agents;
+        }
+
+        /** 推进到下一个 workflow 步骤 */
+        public void addCurrentStepIndex() {
+            currentStepIndex.incrementAndGet();
+        }
+
+        public int getCurrentStepIndex() {
+            return currentStepIndex.get();
         }
 
     }
