@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * @author chaney
- * @description 工作流主流转：校验并写入 agentWorkflows，按首项 type 分发到子节点
+ * @description 工作流主流转：有 workflow 则分发；无则直接短路到 RunnerNode（支持单体 Agent）
  * @create 2026/8/6 14:28
  */
 @Slf4j
@@ -32,6 +32,9 @@ public class AgentWorkflowNode extends AbstractArmorySupport {
     private ParallelAgentNode parallelAgentNode;
     @Resource
     private SequentialAgentNode sequentialAgentNode;
+    /** 未配置 agent-workflows 时直达 Runner */
+    @Resource
+    private RunnerNode runnerNode;
 
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
@@ -40,8 +43,9 @@ public class AgentWorkflowNode extends AbstractArmorySupport {
         AiAgentConfigTableVO aiAgentConfigTableVO = requestParameter.getAiAgentConfigTableVO();
         List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = aiAgentConfigTableVO.getModule().getAgentWorkflows();
 
+        // 无 workflow：不写上下文，直接 router → get() 返回 runnerNode
         if (null == agentWorkflows || agentWorkflows.isEmpty()) {
-            throw new RuntimeException("agentWorkflows is null");
+            return router(requestParameter, dynamicContext);
         }
 
         // 供后续 Loop / Parallel / Sequential 节点读取
@@ -52,8 +56,14 @@ public class AgentWorkflowNode extends AbstractArmorySupport {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryFactory.DynamicContext, AiAgentRegisterVO> get(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
-        // 取列表首项 type，决定进入哪种工作流装配节点
         List<AiAgentConfigTableVO.Module.AgentWorkflow> agentWorkflows = dynamicContext.getAgentWorkflows();
+
+        // 空列表：跳过 Loop/Parallel/Sequential，进 Runner（由 runner.agent-name 指定入口 Agent）
+        if (null == agentWorkflows || agentWorkflows.isEmpty()) {
+            return runnerNode;
+        }
+
+        // 取列表首项 type，决定进入哪种工作流装配节点
         String type = agentWorkflows.get(0).getType();
         AgentTypeEnum agentTypeEnum = AgentTypeEnum.formType(type);
 

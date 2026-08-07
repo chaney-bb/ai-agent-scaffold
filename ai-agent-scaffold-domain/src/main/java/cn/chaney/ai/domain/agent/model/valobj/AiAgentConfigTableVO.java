@@ -47,6 +47,7 @@ public class AiAgentConfigTableVO {
         private String agentDesc;
 
     }
+
     @Data
     public static class Module {
 
@@ -57,6 +58,9 @@ public class AiAgentConfigTableVO {
         private List<Agent> agents;
 
         private List<AgentWorkflow> agentWorkflows;
+
+        /** Runner 入口：指定装入 InMemoryRunner 的 agent 名称（单体或组合均可） */
+        private Runner runner;
 
         @Data
         public static class AiApi {
@@ -127,9 +131,13 @@ public class AiAgentConfigTableVO {
             private Integer maxIterations = 3;
 
         }
+
+        @Data
+        public static class Runner {
+            /** 对应 agents / agent-workflows 中的 name，供 RunnerNode 从 agentGroup 按名取用 */
+            private String agentName;
+        }
     }
-
-
 
 
 }

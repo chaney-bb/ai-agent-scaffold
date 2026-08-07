@@ -57,4 +57,24 @@ public class AiAgentAutoConfigTest {
         // 故意挂起，便于观察日志（非断言需要）
         new CountDownLatch(1).await();
     }
+    /** 第 2-12 节：验证单体智能体 only-one-agent（agent-id=100003，无 agent-workflows） */
+    @Test
+    public void test_handlerMessage_03() {
+        AiAgentRegisterVO aiAgentRegisterVO = applicationContext.getBean("100003", AiAgentRegisterVO.class);
+
+        String appName = aiAgentRegisterVO.getAppName();
+        InMemoryRunner runner = aiAgentRegisterVO.getRunner();
+
+        Session session = runner.sessionService()
+                .createSession(appName, "xiaofuge")
+                .blockingGet();
+
+        Content userMsg = Content.fromParts(Part.fromText("给我目前是27届秋招，想找一份ai应用开发，想知道目前招聘要求是怎么样的"));
+        Flowable<Event> events = runner.runAsync("xiaofuge", session.id(), userMsg);
+
+        List<String> outputs = new ArrayList<>();
+        events.blockingForEach(event -> outputs.add(event.stringifyContent()));
+
+        log.info("测试结果:{}", JSON.toJSONString(outputs));
+    }
 }

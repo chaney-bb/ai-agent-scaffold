@@ -90,3 +90,6 @@ ai:
                   - CodeWriterAgent
                   - CodeReviewerAgent
                   - CodeRefactorerAgent
+            # 指定装入 InMemoryRunner 的入口 Agent（本配置为串行流水线）
+            runner:
+              agent-name: CodePipelineAgent

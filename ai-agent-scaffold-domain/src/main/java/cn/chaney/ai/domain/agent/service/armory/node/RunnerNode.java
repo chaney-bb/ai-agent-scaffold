@@ -6,14 +6,18 @@ import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentRegisterVO;
 import cn.chaney.ai.domain.agent.service.armory.AbstractArmorySupport;
 import cn.chaney.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
-import com.google.adk.agents.SequentialAgent;
+import cn.chaney.ai.types.enums.ResponseCode;
+import cn.chaney.ai.types.exception.AppException;
+import com.google.adk.agents.BaseAgent;
 import com.google.adk.runner.InMemoryRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
  * @author chaney
- * @description 装配链终点：用 SequentialAgent 构建 InMemoryRunner，封装为 VO 注册到 Spring
+ * @description 装配链终点：按 runner.agentName 从 agentGroup 取 Agent，构建 InMemoryRunner 并注册
  * @create 2026/8/6 16:44
  */
 @Slf4j
@@ -32,9 +36,7 @@ public class RunnerNode extends AbstractArmorySupport {
         String agentName = agent.getAgentName();
         String agentDesc = agent.getAgentDesc();
 
-        // SequentialAgentNode 写入；InMemoryRunner 用内存 Session 跑该 Agent
-        SequentialAgent sequentialAgent = dynamicContext.getSequentialAgent();
-        InMemoryRunner runner = new InMemoryRunner(sequentialAgent, appName);
+        InMemoryRunner runner = getRunner(dynamicContext, aiAgentConfigTableVO, appName);
 
         AiAgentRegisterVO aiAgentRegisterVO = AiAgentRegisterVO.builder()
                 .appName(appName)
@@ -48,6 +50,23 @@ public class RunnerNode extends AbstractArmorySupport {
         registerBean(agentId, AiAgentRegisterVO.class, aiAgentRegisterVO);
 
         return aiAgentRegisterVO;
+    }
+
+    /**
+     * 按 YAML module.runner.agent-name 从上下文 agentGroup 取任意已装配 Agent（单体或组合均可）
+     */
+    @NonNull
+    private static InMemoryRunner getRunner(DefaultArmoryFactory.DynamicContext dynamicContext, AiAgentConfigTableVO aiAgentConfigTableVO, String appName) {
+        AiAgentConfigTableVO.Module.Runner runnerConfig = aiAgentConfigTableVO.getModule().getRunner();
+
+        String agentName = runnerConfig.getAgentName();
+        if (StringUtils.isBlank(agentName)) {
+            log.error("runner.agentName is Null");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER.getCode(), ResponseCode.ILLEGAL_PARAMETER.getInfo());
+        }
+
+        BaseAgent baseAgent = dynamicContext.getAgentGroup().get(agentName);
+        return new InMemoryRunner(baseAgent, appName);
     }
 
     @Override

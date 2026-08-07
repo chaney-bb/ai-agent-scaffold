@@ -1,0 +1,35 @@
+ai:
+  agent:
+    config:
+      tables:
+        # 表键须与 test-agent.yml 的 testAgent 区分，避免 Spring 合并污染
+        testAgent03:
+          app-name: onlyAgent
+          agent:
+            agent-id: 100003
+            agent-name: chaney的github总结智能体
+            agent-desc: 这是我创建的第二个智能体，实际上没有啥用
+          module:
+            ai-api:
+              base-url: https://llm-obgbt1lgfa3xdnk1.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+              # 本地填写，勿提交真实密钥
+              api-key: your-api-key
+              completions-path: /chat/completions
+              embeddings-path: /embeddings
+            chat-model:
+              model: qwen3.7-plus
+              tool-mcp-list:
+                - sse:
+                    name: baidu-search
+                    base-uri: http://appbuilder.baidu.com/v2/ai_search/mcp/
+                    # 本地填写百度 MCP api_key
+                    sse-endpoint: sse?api_key=your-baidu-search-api-key
+                    request-timeout: 50000
+            agents:
+              - name: onlyAgent
+                description: chaney学习项目计划
+                instruction: |
+                  通过百度检索大厂ai应用开发岗位应届生秋招相关信息
+            # 无 agent-workflows：AgentWorkflowNode 短路直达 Runner，按名取 onlyAgent
+            runner:
+              agent-name: onlyAgent

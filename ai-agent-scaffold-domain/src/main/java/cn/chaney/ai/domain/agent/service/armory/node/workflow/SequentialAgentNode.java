@@ -46,9 +46,8 @@ public class SequentialAgentNode extends AbstractArmorySupport {
                         .subAgents(subAgents)
                         .build();
 
-        // 写回 agentGroup；并单独留给 RunnerNode 使用
+        // 写入 agentGroup，供 RunnerNode 按 runner.agent-name 按名取用（不再单独 setSequentialAgent）
         dynamicContext.getAgentGroup().put(agentWorkflow.getName(), sequentialAgent);
-        dynamicContext.setSequentialAgent(sequentialAgent);
 
         registerBean(agentWorkflow.getName(), SequentialAgent.class, sequentialAgent);
 

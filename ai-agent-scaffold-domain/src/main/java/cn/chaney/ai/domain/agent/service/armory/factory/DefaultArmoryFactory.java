@@ -50,13 +50,10 @@ public class DefaultArmoryFactory {
          */
         private ChatModel chatModel;
 
-        /**
-         * 当前装配出的串行总 Agent（SequentialAgentNode 写入，RunnerNode 读取）
-         */
-        private SequentialAgent sequentialAgent;
 
         /**
          * 已装配的智能体：key = Agent.name，value = LlmAgent / 工作流 Agent（基类 BaseAgent）
+         * RunnerNode 按 runner.agent-name 从此 Map 取入口 Agent
          */
         private Map<String, BaseAgent> agentGroup = new HashMap<>();
 
