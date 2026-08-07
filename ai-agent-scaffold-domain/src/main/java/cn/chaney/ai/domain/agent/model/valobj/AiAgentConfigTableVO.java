@@ -77,12 +77,18 @@ public class AiAgentConfigTableVO {
             private String model;
             private List<ToolMcp> toolMcpList;
 
+            /**
+             * 一条配置三选一：sse / stdio / local（后续可增 streamableHttp）
+             */
             @Data
             public static class ToolMcp {
 
                 private SSEServerParameters sse;
 
                 private StdioServerParameters stdio;
+
+                /** 本地：Spring 容器中 ToolCallbackProvider 的 bean 名 */
+                private LocalParameters local;
 
                 @Data
                 public static class SSEServerParameters {
@@ -105,6 +111,11 @@ public class AiAgentConfigTableVO {
                         private Map<String, String> env;
 
                     }
+                }
+
+                @Data
+                public static class LocalParameters {
+                    private String name;
                 }
 
             }

@@ -78,7 +78,7 @@ public class AiAgentAutoConfigTest {
         log.info("测试结果:{}", JSON.toJSONString(outputs));
     }
 
-    /** 第 2-12 节：验证单体智能体 only-one-agent（agent-id=100003，无 agent-workflows） */
+    /** 第 2-14 节：only-one-agent（agent-id=100003）挂 sse + local，验证本地 toUpperCase 工具 */
     @Test
     public void test_handlerMessage_03() {
         AiAgentRegisterVO aiAgentRegisterVO = applicationContext.getBean("100003", AiAgentRegisterVO.class);
@@ -90,7 +90,7 @@ public class AiAgentAutoConfigTest {
                 .createSession(appName, "xiaofuge")
                 .blockingGet();
 
-        Content userMsg = Content.fromParts(Part.fromText("给我目前是27届秋招，想找一份ai应用开发，想知道目前招聘要求是怎么样的"));
+        Content userMsg = Content.fromParts(Part.fromText("帮我把chaney转换为大写"));
         Flowable<Event> events = runner.runAsync("xiaofuge", session.id(), userMsg);
 
         List<String> outputs = new ArrayList<>();

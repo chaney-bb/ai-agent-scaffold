@@ -16,10 +16,10 @@ thread:
 spring:
   config:
     import:
-      - classpath:agent/test-agent.yml
+#      - classpath:agent/test-agent.yml
       # 第 2-12 节：单体智能体（100003），表键 testAgent03
       - classpath:agent/only-one-agent.yml
-      - classpath:agent/parallel_research_app.yml
+#      - classpath:agent/parallel_research_app.yml
   datasource:
     username: root
     password: 123456

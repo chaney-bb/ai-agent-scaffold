@@ -25,11 +25,13 @@ ai:
                     # 本地填写百度 MCP api_key
                     sse-endpoint: sse?api_key=your-baidu-search-api-key
                     request-timeout: 50000
+                - local:
+                    name: myToolCallbackProvider
             agents:
               - name: onlyAgent
                 description: chaney学习项目计划
                 instruction: |
-                  通过百度检索大厂ai应用开发岗位应届生秋招相关信息
+                  通过百度检索大厂ai应用开发岗位应届生秋招相关信息等其他服务
             # 无 agent-workflows：AgentWorkflowNode 短路直达 Runner，按名取 onlyAgent
             runner:
               agent-name: onlyAgent
