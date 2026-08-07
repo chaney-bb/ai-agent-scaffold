@@ -1,10 +1,10 @@
-package cn.chaney.ai.domain.agent.service.armory.mcp.client.factory;
+package cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.factory;
 
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
-import cn.chaney.ai.domain.agent.service.armory.mcp.client.ToolMcpCreateService;
-import cn.chaney.ai.domain.agent.service.armory.mcp.client.imp.LocalToolMcpCreateService;
-import cn.chaney.ai.domain.agent.service.armory.mcp.client.imp.SSEToolMcpCreateService;
-import cn.chaney.ai.domain.agent.service.armory.mcp.client.imp.StdioToolMcpCreateService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.ToolMcpCreateService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.imp.LocalToolMcpCreateService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.imp.SSEToolMcpCreateService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.imp.StdioToolMcpCreateService;
 import cn.chaney.ai.types.enums.ResponseCode;
 import cn.chaney.ai.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;

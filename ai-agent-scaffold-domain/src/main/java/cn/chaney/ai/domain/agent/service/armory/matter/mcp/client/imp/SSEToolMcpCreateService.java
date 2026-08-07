@@ -1,7 +1,7 @@
-package cn.chaney.ai.domain.agent.service.armory.mcp.client.imp;
+package cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.imp;
 
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
-import cn.chaney.ai.domain.agent.service.armory.mcp.client.ToolMcpCreateService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.ToolMcpCreateService;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;

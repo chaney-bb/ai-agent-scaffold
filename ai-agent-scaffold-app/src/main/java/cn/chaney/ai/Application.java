@@ -1,6 +1,6 @@
 package cn.chaney.ai;
 
-import cn.chaney.ai.domain.agent.service.armory.mcp.server.MyTestMcpService;
+import cn.chaney.ai.domain.agent.service.armory.matter.mcp.server.MyTestMcpService;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Configurable;

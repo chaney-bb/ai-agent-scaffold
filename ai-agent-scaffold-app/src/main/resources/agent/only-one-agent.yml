@@ -35,3 +35,6 @@ ai:
             # 无 agent-workflows：AgentWorkflowNode 短路直达 Runner，按名取 onlyAgent
             runner:
               agent-name: onlyAgent
+              plugin-name-list:
+                - myTestPlugin
+                - myLogPlugin

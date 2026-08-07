@@ -147,6 +147,8 @@ public class AiAgentConfigTableVO {
         public static class Runner {
             /** 对应 agents / agent-workflows 中的 name，供 RunnerNode 从 agentGroup 按名取用 */
             private String agentName;
+
+            private List<String> pluginNameList;
         }
     }
 

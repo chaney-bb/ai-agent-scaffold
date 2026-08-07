@@ -1,4 +1,4 @@
-package cn.chaney.ai.domain.agent.service.armory.mcp.server;
+package cn.chaney.ai.domain.agent.service.armory.matter.mcp.server;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
