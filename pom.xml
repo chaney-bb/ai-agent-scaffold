@@ -118,32 +118,28 @@
             <dependency>
                 <groupId>com.google.adk</groupId>
                 <artifactId>google-adk</artifactId>
-                <version>0.4.0</version>
+                <version>1.1.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.google.adk</groupId>
                 <artifactId>google-adk-dev</artifactId>
-                <version>0.4.0</version>
+                <version>1.1.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.google.adk</groupId>
                 <artifactId>google-adk-spring-ai</artifactId>
-                <version>0.4.0</version>
+                <version>1.1.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.google.adk.samples</groupId>
                 <artifactId>google-adk-sample-helloworld</artifactId>
-                <version>0.4.0</version>
+                <version>1.1.0</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.google.adk</groupId>
-                <artifactId>google-adk-contrib-langchain4j</artifactId>
-                <version>0.2.0</version>
-            </dependency>
+
 
             <!--            <dependency>-->
             <!--                <groupId>dev.langchain4j</groupId>-->
@@ -167,13 +163,6 @@
             </dependency>
 
             <!-- langchain4j https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-bom -->
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-bom</artifactId>
-                <version>1.4.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <!-- 设计模式框架 -->
             <dependency>
