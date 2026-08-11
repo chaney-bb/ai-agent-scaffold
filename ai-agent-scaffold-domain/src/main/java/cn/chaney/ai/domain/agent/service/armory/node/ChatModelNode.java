@@ -8,6 +8,7 @@ import cn.chaney.ai.domain.agent.service.armory.AbstractArmorySupport;
 import cn.chaney.ai.domain.agent.service.armory.factory.DefaultArmoryFactory;
 import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.ToolMcpCreateService;
 import cn.chaney.ai.domain.agent.service.armory.matter.mcp.client.factory.DefaultMcpClientFactory;
+import cn.chaney.ai.domain.agent.service.armory.matter.skills.ToolSkillsCreateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -22,7 +23,7 @@ import java.util.List;
 
 /**
  * @author chaney
- * @description 装配对话模型：挂上 OpenAiApi + MCP/本地工具，写入上下文
+ * @description 装配对话模型：挂上 OpenAiApi + MCP/本地工具 + Skills，写入上下文
  * @create 2026/8/5 20:35
  */
 @Slf4j
@@ -36,6 +37,9 @@ public class ChatModelNode extends AbstractArmorySupport {
     @Resource
     private DefaultMcpClientFactory mcpClientFactory;
 
+    @Resource
+    private ToolSkillsCreateService toolSkillsCreateService;
+
     @Override
     protected AiAgentRegisterVO doApply(ArmoryCommandEntity requestParameter, DefaultArmoryFactory.DynamicContext dynamicContext) throws Exception {
         log.info("Ai Agent 装配操作 - ChatModelNode");
@@ -46,6 +50,8 @@ public class ChatModelNode extends AbstractArmorySupport {
         AiAgentConfigTableVO aiAgentConfigTableVO = requestParameter.getAiAgentConfigTableVO();
         AiAgentConfigTableVO.Module.ChatModel chatModelConfig = aiAgentConfigTableVO.getModule().getChatModel();
         List<AiAgentConfigTableVO.Module.ChatModel.ToolMcp> toolMcpList = chatModelConfig.getToolMcpList();
+        List<AiAgentConfigTableVO.Module.ChatModel.ToolSkills> toolSkillsList = chatModelConfig.getToolSkillsList();
+
 
         // 每条 ToolMcp 配置 → 工厂选策略 → 汇总为 ToolCallback 列表挂到 ChatModel
         List<ToolCallback> toolCallbackList = new ArrayList<>();
@@ -53,6 +59,14 @@ public class ChatModelNode extends AbstractArmorySupport {
             ToolMcpCreateService toolMcpCreateService = mcpClientFactory.getToolMcpCreateService(toolMcp);
             ToolCallback[] toolCallbacks = toolMcpCreateService.buildToolCallback(toolMcp);
             toolCallbackList.addAll(List.of(toolCallbacks));
+        }
+
+        //构建skills服务
+        if(null !=toolSkillsList && !toolSkillsList.isEmpty()){
+            for (AiAgentConfigTableVO.Module.ChatModel.ToolSkills toolSkills : toolSkillsList) {
+                ToolCallback[] toolCallbacks=toolSkillsCreateService.buildToolCallback(toolSkills);
+                toolCallbackList.addAll(List.of(toolCallbacks));
+            }
         }
 
         ChatModel chatModel = OpenAiChatModel.builder()

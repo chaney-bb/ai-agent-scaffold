@@ -27,6 +27,9 @@ ai:
                     request-timeout: 50000
                 - local:
                     name: myToolCallbackProvider
+              tool-skills-list:
+                - type: resource
+                  path: agent/skills
             agents:
               - name: onlyAgent
                 description: chaney学习项目计划

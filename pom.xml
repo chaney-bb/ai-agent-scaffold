@@ -162,6 +162,11 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.springaicommunity</groupId>
+                <artifactId>spring-ai-agent-utils</artifactId>
+                <version>0.4.2</version>
+            </dependency>
             <!-- langchain4j https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-bom -->
 
             <!-- 设计模式框架 -->
