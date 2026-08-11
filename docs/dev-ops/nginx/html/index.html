@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaney Agent · 对话</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ========== Kimi 式极简：侧栏浅灰 + 主区纯白 ========== */
+      :root {
+        --bg-side: #f5f5f5;
+        --bg-main: #ffffff;
+        --ink: #1a1a1a;
+        --muted: #8c8c8c;
+        --muted-2: #b0b0b0;
+        --line: #ebebeb;
+        --hover: #eeeeee;
+        --active: #ffffff;
+        --user-bubble: #f0f0f0;
+        --accent: #2f6bff;
+        --danger: #d4380d;
+        --radius: 12px;
+        --side-w: 260px;
+        --font: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: var(--font);
+        background: var(--bg-main);
+      }
+
+      /* 整体：左栏 + 右主区 */
+      .app {
+        height: 100%;
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* ---------- 左侧栏 ---------- */
+      .sidebar {
+        width: var(--side-w);
+        flex: 0 0 var(--side-w);
+        background: var(--bg-side);
+        display: flex;
+        flex-direction: column;
+        padding: 14px 12px;
+        transition: margin-left 200ms ease, width 200ms ease;
+        z-index: 4;
+      }
+
+      /* 折叠：侧栏移出可视区 */
+      .app.sidebar-collapsed .sidebar {
+        margin-left: calc(-1 * var(--side-w));
+        width: var(--side-w);
+      }
+
+      .side-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 4px 12px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 15px;
+      }
+
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .icon-btn {
+        border: 0;
+        background: transparent;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+      }
+
+      .icon-btn:hover {
+        background: var(--hover);
+        color: var(--ink);
+      }
+
+      /* 新建会话按钮 */
+      .new-chat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        border: 1px solid #ddd;
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+        color: var(--ink);
+        margin-bottom: 12px;
+      }
+
+      .new-chat:hover {
+        border-color: #ccc;
+        background: #fafafa;
+      }
+
+      .new-chat .kbd {
+        font-size: 11px;
+        color: var(--muted-2);
+        font-weight: 400;
+      }
+
+      .history {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 4px 0;
+      }
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 13px;
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .history-item:hover {
+        background: var(--hover);
+      }
+
+      /* 当前选中：白底 + 右侧小蓝点（类似 Kimi） */
+      .history-item.active {
+        background: var(--active);
+        box-shadow: 0 0 0 1px var(--line);
+      }
+
+      .history-item .title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .history-item .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex: 0 0 auto;
+        opacity: 0;
+      }
+
+      .history-item.active .dot {
+        opacity: 1;
+      }
+
+      .history-empty {
+        padding: 16px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .side-bottom {
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #ddd;
+        color: #555;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        flex: 0 0 auto;
+      }
+
+      .user-chip strong {
+        display: block;
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .user-chip span {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .link-btn {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 8px;
+      }
+
+      .link-btn:hover {
+        background: var(--hover);
+        color: var(--ink);
+      }
+
+      /* ---------- 右侧主区 ---------- */
+      .main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        background: var(--bg-main);
+      }
+
+      .main-header {
+        height: 52px;
+        flex: 0 0 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-bottom: 1px solid transparent;
+      }
+
+      .main-header .open-side {
+        display: none;
+      }
+
+      .app.sidebar-collapsed .main-header .open-side {
+        display: grid;
+      }
+
+      .chat-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink);
+        max-width: min(70vw, 640px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .api-hint {
+        font-size: 11px;
+        color: var(--muted-2);
+      }
+
+      /* 消息滚动区：底部给悬浮输入留空 */
+      .chat {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 24px 24px 180px;
+      }
+
+      .chat-inner {
+        width: min(760px, 100%);
+        margin: 0 auto;
+      }
+
+      .empty-state {
+        padding: 80px 16px 40px;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .empty-state h2 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .empty-state p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      /* 气泡左右：用户右、助手左（需求明确调整） */
+      .msg-row {
+        display: flex;
+        margin: 18px 0;
+        animation: fade-up 200ms ease;
+        gap: 10px;
+      }
+
+      .msg-row.user {
+        justify-content: flex-end;
+      }
+
+      .msg-row.agent {
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 助手头像：固定在消息左侧 */
+      .msg-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--ink);
+        color: #fff;
+        margin-top: 2px;
+      }
+
+      .bubble {
+        max-width: min(85%, 640px);
+        font-size: 15px;
+        line-height: 1.75;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      /* 有头像时，助手气泡略收窄，避免顶到右边 */
+      .msg-row.agent .bubble {
+        max-width: min(calc(85% - 42px), 600px);
+      }
+
+      /* 用户：右对齐浅灰气泡 */
+      .bubble.user {
+        background: var(--user-bubble);
+        border-radius: 18px;
+        padding: 10px 14px;
+      }
+
+      /* 助手：左侧接近文档正文，不加重框 */
+      .bubble.agent {
+        padding: 2px 0;
+        color: var(--ink);
+      }
+
+      .bubble .meta-line {
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--muted-2);
+      }
+
+      /* ---------- 底部悬浮输入（类似 Kimi） ---------- */
+      .composer-dock {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 0 24px 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0), #fff 40%);
+        pointer-events: none;
+      }
+
+      .composer-dock > * {
+        pointer-events: auto;
+      }
+
+      .composer {
+        width: min(760px, 100%);
+        margin: 0 auto;
+        border: 1px solid #e5e5e5;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+        padding: 10px 12px 10px 14px;
+        display: grid;
+        grid-template-columns: 36px 1fr auto;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .plus-placeholder {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 22px;
+        line-height: 1;
+        cursor: default;
+        opacity: 0.55;
+      }
+
+      .textarea {
+        width: 100%;
+        border: 0;
+        outline: none;
+        resize: none;
+        font: inherit;
+        font-size: 15px;
+        line-height: 1.5;
+        min-height: 40px;
+        max-height: 140px;
+        padding: 8px 4px;
+        background: transparent;
+        color: var(--ink);
+      }
+
+      .composer-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 2px;
+      }
+
+      /* 智能体下拉：只展示名称 */
+      .agent-select {
+        max-width: 140px;
+        border: 0;
+        background: #f5f5f5;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font: inherit;
+        font-size: 12px;
+        color: var(--ink);
+        outline: none;
+        cursor: pointer;
+      }
+
+      .send-btn {
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 50%;
+        background: #cfcfcf;
+        color: #fff;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: background 120ms ease;
+      }
+
+      .send-btn.ready {
+        background: var(--ink);
+      }
+
+      .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .disclaimer {
+        width: min(760px, 100%);
+        margin: 8px auto 0;
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted-2);
+      }
+
+      .status {
+        width: min(760px, 100%);
+        margin: 0 auto 6px;
+        min-height: 16px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .status.error {
+        color: var(--danger);
+      }
+
+      /* 服务端不可用遮罩 */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.28);
+      }
+
+      .modal {
+        width: min(480px, 100%);
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+      }
+
+      .modal-header {
+        padding: 16px 16px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .modal-body {
+        padding: 14px 16px;
+      }
+
+      .modal-body p {
+        margin: 0 0 10px;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.7;
+      }
+
+      .modal-body code {
+        display: block;
+        padding: 12px;
+        border-radius: 10px;
+        background: #f7f7f7;
+        border: 1px solid var(--line);
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .modal-actions {
+        padding: 0 16px 16px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .btn-secondary {
+        background: #f0f0f0;
+        color: var(--ink);
+      }
+
+      @media (max-width: 860px) {
+        .sidebar {
+          position: absolute;
+          height: 100%;
+          box-shadow: 8px 0 24px rgba(0, 0, 0, 0.06);
+        }
+        .app.sidebar-collapsed .sidebar {
+          margin-left: calc(-1 * var(--side-w));
+        }
+        .main-header .open-side {
+          display: grid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      布局说明（对照设计文档 / Kimi 结构）：
+      - 左：侧栏（Logo、新建会话、本地历史、用户）
+      - 右：标题 + 消息流 + 底部悬浮输入
+      - 气泡：用户右、LLM 左
+      - 智能体下拉：只显示 agentName
+    -->
+    <div class="app" id="app">
+      <aside class="sidebar" aria-label="侧栏">
+        <div class="side-top">
+          <div class="logo">
+            <div class="logo-mark" aria-hidden="true">C</div>
+            <span>Chaney</span>
+          </div>
+          <button class="icon-btn" id="collapseBtn" type="button" title="收起侧栏" aria-label="收起侧栏">
+            «
+          </button>
+        </div>
+
+        <button class="new-chat" id="newSessionBtn" type="button">
+          <span>+ 新建会话</span>
+          <span class="kbd">Ctrl K</span>
+        </button>
+
+        <div class="history" id="historyList" aria-label="会话历史"></div>
+
+        <div class="side-bottom">
+          <div class="user-chip">
+            <div class="avatar" id="avatarText">A</div>
+            <div style="min-width: 0">
+              <strong id="userIdText">user</strong>
+              <span id="loginMeta">已登录</span>
+            </div>
+          </div>
+          <button class="link-btn" id="logoutBtn" type="button">退出</button>
+        </div>
+      </aside>
+
+      <section class="main" aria-label="对话主区">
+        <header class="main-header">
+          <div style="display: flex; align-items: center; gap: 8px; min-width: 0">
+            <button class="icon-btn open-side" id="expandBtn" type="button" title="展开侧栏" aria-label="展开侧栏">
+              »
+            </button>
+            <div class="chat-title" id="chatTitle">新会话</div>
+          </div>
+          <div class="api-hint" id="apiHint">API: -</div>
+        </header>
+
+        <div class="chat" id="chat">
+          <div class="chat-inner" id="chatInner">
+            <div class="empty-state" id="emptyState">
+              <h2>有什么可以帮你？</h2>
+              <p>选择智能体后开始提问。同一会话会保留上下文。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer-dock">
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+          <form class="composer" id="composer">
+            <!-- 附件入口占位：本节只做文本对话，先不接上传 -->
+            <button class="plus-placeholder" type="button" tabindex="-1" aria-hidden="true">+</button>
+            <textarea
+              id="message"
+              class="textarea"
+              placeholder="尽管问…"
+              autocomplete="off"
+              rows="1"
+            ></textarea>
+            <div class="composer-right">
+              <select id="agentSelect" class="agent-select" aria-label="选择智能体" title="选择智能体">
+                <option value="">加载中…</option>
+              </select>
+              <button class="send-btn" id="sendBtn" type="submit" title="发送" aria-label="发送">
+                ↑
+              </button>
+            </div>
+          </form>
+          <div class="disclaimer">内容由 AI 生成，请仔细甄别</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="backendModal" role="dialog" aria-modal="true" aria-labelledby="backendTitle">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="backendTitle">服务端接口不可用</h3>
+          <button class="btn btn-secondary" type="button" id="backendCloseBtn">关闭</button>
+        </div>
+        <div class="modal-body">
+          <p id="backendDesc">请先启动服务端，确认 API_BASE 可访问后点击「重试」。</p>
+          <code id="backendCode"></code>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" type="button" id="backendRetryBtn">我已启动，重试</button>
+          <button class="btn" type="button" id="backendOkBtn">知道了</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+      // =========================
+      // 0. Cookie / 工具
+      // =========================
+      const COOKIE_NAME = "ai_agent_login";
+
+      function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split("; ") : [];
+        for (const item of cookies) {
+          const eqIndex = item.indexOf("=");
+          const k = eqIndex >= 0 ? item.slice(0, eqIndex) : item;
+          const v = eqIndex >= 0 ? item.slice(eqIndex + 1) : "";
+          if (k === name) return decodeURIComponent(v);
+        }
+        return null;
+      }
+
+      function deleteCookie(name) {
+        document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+      }
+
+      function safeParseJson(text) {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      }
+
+      /** 防 XSS：把文本转成可安全写入 innerHTML 的内容 */
+      function escapeHtml(text) {
+        return String(text)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function formatTime(ts) {
+        const d = new Date(ts);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      }
+
+      /** 会话标题：取首条用户消息前若干字 */
+      function makeTitle(text) {
+        const t = String(text || "").trim().replace(/\s+/g, " ");
+        if (!t) return "新会话";
+        return t.length > 18 ? t.slice(0, 18) + "…" : t;
+      }
+
+      // =========================
+      // 1. DOM 引用
+      // =========================
+      const dom = {
+        app: document.getElementById("app"),
+        collapseBtn: document.getElementById("collapseBtn"),
+        expandBtn: document.getElementById("expandBtn"),
+        newSessionBtn: document.getElementById("newSessionBtn"),
+        historyList: document.getElementById("historyList"),
+        userIdText: document.getElementById("userIdText"),
+        loginMeta: document.getElementById("loginMeta"),
+        avatarText: document.getElementById("avatarText"),
+        logoutBtn: document.getElementById("logoutBtn"),
+        chatTitle: document.getElementById("chatTitle"),
+        apiHint: document.getElementById("apiHint"),
+        chat: document.getElementById("chat"),
+        chatInner: document.getElementById("chatInner"),
+        emptyState: document.getElementById("emptyState"),
+        status: document.getElementById("status"),
+        composer: document.getElementById("composer"),
+        message: document.getElementById("message"),
+        sendBtn: document.getElementById("sendBtn"),
+        agentSelect: document.getElementById("agentSelect"),
+        backendModal: document.getElementById("backendModal"),
+        backendDesc: document.getElementById("backendDesc"),
+        backendCode: document.getElementById("backendCode"),
+        backendCloseBtn: document.getElementById("backendCloseBtn"),
+        backendRetryBtn: document.getElementById("backendRetryBtn"),
+        backendOkBtn: document.getElementById("backendOkBtn"),
+      };
+
+      // =========================
+      // 2. 登录门禁 + 全局状态
+      // =========================
+      const apiBase =
+        (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8091";
+      dom.apiHint.textContent = `API: ${apiBase}`;
+
+      const rawLogin = getCookie(COOKIE_NAME);
+      const loginPayload = rawLogin ? safeParseJson(rawLogin) : null;
+      const userId = loginPayload && loginPayload.user ? String(loginPayload.user) : "";
+
+      if (!userId) {
+        window.location.replace("./login.html");
+      }
+
+      dom.userIdText.textContent = userId;
+      dom.avatarText.textContent = (userId[0] || "U").toUpperCase();
+      dom.loginMeta.textContent =
+        loginPayload && loginPayload.ts ? formatTime(loginPayload.ts) : "已登录";
+
+      /**
+       * 当前会话状态
+       * localId：前端历史条目的本地 id（侧栏点击用）
+       * sessionId：后端 ADK 会话 id（调 chat 用）
+       */
+      let currentLocalId = "";
+      let currentSessionId = "";
+      let currentTitle = "新会话";
+
+      // 本地历史存储键（按用户隔离）
+      const HISTORY_KEY = `ai_agent_chat_history_${userId}`;
+
+      /**
+       * 读取本地会话历史
+       * 结构：[{ localId, sessionId, agentId, agentName, title, updatedAt, messages:[{side,text}] }]
+       * 说明：后端本节没有「列历史」接口，所以用 localStorage 做侧栏列表。
+       */
+      function loadHistory() {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        const list = raw ? safeParseJson(raw) : [];
+        return Array.isArray(list) ? list : [];
+      }
+
+      function saveHistory(list) {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+      }
+
+      // =========================
+      // 3. UI 小工具
+      // =========================
+      function setStatus(text, type) {
+        dom.status.textContent = text || "";
+        dom.status.classList.toggle("error", type === "error");
+      }
+
+      function setBackendModalVisible(visible) {
+        dom.backendModal.style.display = visible ? "flex" : "none";
+      }
+
+      function showBackendModal(reason) {
+        const msg = reason && reason.message ? String(reason.message) : String(reason || "");
+        const curl = `curl -s ${apiBase}/api/v1/query_ai_agent_config_list`;
+        dom.backendDesc.textContent =
+          "当前页面需要访问服务端接口。请先启动服务端，然后点击「重试」。若已启动仍失败，请检查 docs/dev-ops/nginx/html/js/config.js 的 API_BASE。";
+        dom.backendCode.textContent = `配置文件：docs/dev-ops/nginx/html/js/config.js\nAPI_BASE: ${apiBase}\n${curl}${
+          msg ? `\n\n错误：${msg}` : ""
+        }`;
+        setBackendModalVisible(true);
+      }
+
+      function isBackendUnavailableError(err) {
+        const msg = err && err.message ? String(err.message) : String(err || "");
+        return (
+          msg.includes("Failed to fetch") ||
+          msg.includes("NetworkError") ||
+          msg.includes("Load failed") ||
+          msg.includes("CORS") ||
+          msg.includes("fetch")
+        );
+      }
+
+      function scrollToBottom() {
+        dom.chat.scrollTop = dom.chat.scrollHeight;
+      }
+
+      function updateSendBtnState() {
+        const hasText = !!(dom.message.value || "").trim();
+        dom.sendBtn.classList.toggle("ready", hasText);
+      }
+
+      function setChatTitle(title) {
+        currentTitle = title || "新会话";
+        dom.chatTitle.textContent = currentTitle;
+      }
+
+      /** 渲染侧栏历史列表 */
+      function renderHistoryList() {
+        const list = loadHistory().slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        if (!list.length) {
+          dom.historyList.innerHTML = `<div class="history-empty">暂无会话。发送一条消息后会出现在这里。</div>`;
+          return;
+        }
+        dom.historyList.innerHTML = list
+          .map((item) => {
+            const active = item.localId === currentLocalId ? "active" : "";
+            return `<button type="button" class="history-item ${active}" data-id="${escapeHtml(
+              item.localId
+            )}"><span class="title">${escapeHtml(item.title || "新会话")}</span><span class="dot"></span></button>`;
+          })
+          .join("");
+      }
+
+      /**
+       * 追加气泡
+       * side=user → 右；side=agent → 左（左侧带助手头像）
+       */
+      function addBubble(side, text, metaText) {
+        // 有消息后隐藏空状态
+        if (dom.emptyState) dom.emptyState.style.display = "none";
+
+        const row = document.createElement("div");
+        row.className = `msg-row ${side}`;
+
+        // 助手消息：左侧头像（取当前智能体名称首字；没有则显示 A）
+        if (side === "agent") {
+          const avatar = document.createElement("div");
+          avatar.className = "msg-avatar";
+          avatar.setAttribute("aria-hidden", "true");
+          const agentName =
+            (dom.agentSelect.selectedOptions[0] &&
+              dom.agentSelect.selectedOptions[0].textContent &&
+              dom.agentSelect.selectedOptions[0].value &&
+              dom.agentSelect.selectedOptions[0].textContent.trim()) ||
+            "Agent";
+          avatar.textContent = (agentName[0] || "A").toUpperCase();
+          avatar.title = agentName;
+          row.appendChild(avatar);
+        }
+
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${side}`;
+        bubble.innerHTML = escapeHtml(text || "");
+        if (metaText) {
+          const meta = document.createElement("div");
+          meta.className = "meta-line";
+          meta.textContent = metaText;
+          bubble.appendChild(meta);
+        }
+        row.appendChild(bubble);
+        dom.chatInner.appendChild(row);
+        scrollToBottom();
+        return bubble;
+      }
+
+      /** 用历史消息重绘主区 */
+      function renderMessages(messages) {
+        dom.chatInner.innerHTML = "";
+        if (!messages || !messages.length) {
+          dom.chatInner.innerHTML = `<div class="empty-state" id="emptyState"><h2>有什么可以帮你？</h2><p>选择智能体后开始提问。同一会话会保留上下文。</p></div>`;
+          dom.emptyState = document.getElementById("emptyState");
+          return;
+        }
+        dom.emptyState = null;
+        messages.forEach((m) => addBubble(m.side, m.text));
+      }
+
+      /** 把当前对话进度写回 localStorage */
+      function upsertCurrentHistory(patch) {
+        const list = loadHistory();
+        let idx = list.findIndex((x) => x.localId === currentLocalId);
+        if (idx < 0) {
+          // 还没有本地条目：新建一条
+          const agentId = dom.agentSelect.value || "";
+          const agentName =
+            (dom.agentSelect.selectedOptions[0] && dom.agentSelect.selectedOptions[0].textContent) ||
+            agentId;
+          const item = {
+            localId: currentLocalId || `L-${Date.now()}`,
+            sessionId: currentSessionId || "",
+            agentId,
+            agentName,
+            title: currentTitle || "新会话",
+            updatedAt: Date.now(),
+            messages: [],
+          };
+          currentLocalId = item.localId;
+          list.unshift(item);
+          idx = 0;
+        }
+        Object.assign(list[idx], patch, { updatedAt: Date.now() });
+        saveHistory(list);
+        renderHistoryList();
+      }
+
+      function clearToNewDraft() {
+        currentLocalId = "";
+        currentSessionId = "";
+        setChatTitle("新会话");
+        renderMessages([]);
+        renderHistoryList();
+        setStatus("已进入新会话草稿，发送后会创建服务端会话。");
+        dom.message.focus();
+      }
+
+      // =========================
+      // 4. 网络请求
+      // =========================
+      async function requestJson(path, options) {
+        const url = `${apiBase}${path}`;
+        let res;
+        try {
+          res = await fetch(url, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(options && options.headers ? options.headers : {}),
+            },
+            ...options,
+          });
+        } catch (err) {
+          if (isBackendUnavailableError(err)) showBackendModal(err);
+          throw err;
+        }
+        const contentType = res.headers.get("content-type") || "";
+        const raw = await res.text();
+        let json = null;
+        if (contentType.includes("application/json")) {
+          json = safeParseJson(raw);
+        } else {
+          json = safeParseJson(raw) || { raw };
+        }
+        if (!res.ok) {
+          const message = (json && (json.info || json.message)) || raw || `HTTP ${res.status}`;
+          throw new Error(message);
+        }
+        return json;
+      }
+
+      function ensureSuccess(resp) {
+        if (!resp) throw new Error("接口无返回");
+        if (resp.code && resp.code !== "0000") {
+          throw new Error(resp.info || `接口失败：${resp.code}`);
+        }
+        return resp.data;
+      }
+
+      // =========================
+      // 5. 三个业务接口
+      // =========================
+
+      /** GET 智能体列表；下拉框只展示 agentName */
+      async function loadAgents() {
+        dom.agentSelect.innerHTML = `<option value="">加载中…</option>`;
+        const resp = await requestJson("/api/v1/query_ai_agent_config_list", { method: "GET" });
+        const data = ensureSuccess(resp) || [];
+        const lastAgentId = localStorage.getItem("ai_agent_last_agent") || "";
+
+        const options = [`<option value="">选择智能体</option>`].concat(
+          data.map((x) => {
+            const id = x.agentId || "";
+            // 只要名称，不拼接 agentDesc
+            const name = x.agentName || id;
+            const selected = id && id === lastAgentId ? "selected" : "";
+            return `<option value="${escapeHtml(id)}" ${selected}>${escapeHtml(name)}</option>`;
+          })
+        );
+        dom.agentSelect.innerHTML = options.join("");
+      }
+
+      /** POST /api/v1/create_session */
+      async function createSession(agentId) {
+        const resp = await requestJson("/api/v1/create_session", {
+          method: "POST",
+          body: JSON.stringify({ agentId, userId }),
+        });
+        const data = ensureSuccess(resp);
+        const sessionId = data && data.sessionId ? String(data.sessionId) : "";
+        if (!sessionId) throw new Error("创建会话失败：无 sessionId");
+        currentSessionId = sessionId;
+        return sessionId;
+      }
+
+      /** POST /api/v1/chat */
+      async function chat(agentId, sessionId, message) {
+        const resp = await requestJson("/api/v1/chat", {
+          method: "POST",
+          body: JSON.stringify({ agentId, userId, sessionId, message }),
+        });
+        const data = ensureSuccess(resp);
+        return data && data.content ? String(data.content) : "";
+      }
+
+      // =========================
+      // 6. 事件绑定
+      // =========================
+      dom.collapseBtn.addEventListener("click", () => {
+        dom.app.classList.add("sidebar-collapsed");
+      });
+      dom.expandBtn.addEventListener("click", () => {
+        dom.app.classList.remove("sidebar-collapsed");
+      });
+
+      dom.backendCloseBtn.addEventListener("click", () => setBackendModalVisible(false));
+      dom.backendOkBtn.addEventListener("click", () => setBackendModalVisible(false));
+      dom.backendModal.addEventListener("click", (e) => {
+        if (e.target === dom.backendModal) setBackendModalVisible(false);
+      });
+
+      dom.logoutBtn.addEventListener("click", () => {
+        deleteCookie(COOKIE_NAME);
+        window.location.replace("./login.html");
+      });
+
+      // 切换智能体：清空后端 session，避免 A/B 串上下文
+      dom.agentSelect.addEventListener("change", () => {
+        const agentId = dom.agentSelect.value || "";
+        if (agentId) localStorage.setItem("ai_agent_last_agent", agentId);
+        currentSessionId = "";
+        setStatus("已切换智能体，下次发送将创建新的服务端会话。");
+      });
+
+      // 新建会话：只清前端草稿；真正 create_session 放到首次发送（更像 Kimi）
+      function startNewChat() {
+        clearToNewDraft();
+      }
+      dom.newSessionBtn.addEventListener("click", startNewChat);
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+          e.preventDefault();
+          startNewChat();
+        }
+      });
+
+      // 点击侧栏历史：恢复本地消息与 sessionId（后端消息列表本节没有，靠本地缓存）
+      dom.historyList.addEventListener("click", (e) => {
+        const btn = e.target.closest(".history-item");
+        if (!btn) return;
+        const id = btn.getAttribute("data-id");
+        const item = loadHistory().find((x) => x.localId === id);
+        if (!item) return;
+
+        currentLocalId = item.localId;
+        currentSessionId = item.sessionId || "";
+        setChatTitle(item.title || "新会话");
+        if (item.agentId) {
+          dom.agentSelect.value = item.agentId;
+        }
+        renderMessages(item.messages || []);
+        renderHistoryList();
+        setStatus(currentSessionId ? `已切换会话 ${currentSessionId}` : "该草稿尚未创建服务端会话");
+      });
+
+      dom.message.addEventListener("input", updateSendBtnState);
+
+      // Enter 发送；Shift+Enter 换行
+      dom.message.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          dom.composer.requestSubmit();
+        }
+      });
+
+      function setSending(sending) {
+        dom.sendBtn.disabled = !!sending;
+        dom.message.disabled = !!sending;
+        dom.agentSelect.disabled = !!sending;
+        dom.newSessionBtn.disabled = !!sending;
+      }
+
+      // 发送主流程
+      dom.composer.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStatus("");
+
+        const agentId = dom.agentSelect.value || "";
+        if (!agentId) {
+          setStatus("请先选择智能体。", "error");
+          dom.agentSelect.focus();
+          return;
+        }
+
+        const message = (dom.message.value || "").trim();
+        if (!message) return;
+
+        dom.message.value = "";
+        updateSendBtnState();
+        setSending(true);
+
+        // 首条消息：生成本地历史 id，并更新标题
+        if (!currentLocalId) {
+          currentLocalId = `L-${Date.now()}`;
+          setChatTitle(makeTitle(message));
+        } else if (currentTitle === "新会话") {
+          setChatTitle(makeTitle(message));
+        }
+
+        addBubble("user", message);
+        const agentBubble = addBubble("agent", "思考中…");
+
+        // 先把用户消息写入本地历史
+        const listBefore = loadHistory();
+        let item = listBefore.find((x) => x.localId === currentLocalId);
+        const agentName =
+          (dom.agentSelect.selectedOptions[0] && dom.agentSelect.selectedOptions[0].textContent) ||
+          agentId;
+        if (!item) {
+          item = {
+            localId: currentLocalId,
+            sessionId: "",
+            agentId,
+            agentName,
+            title: currentTitle,
+            updatedAt: Date.now(),
+            messages: [],
+          };
+          listBefore.unshift(item);
+        }
+        item.messages = item.messages || [];
+        item.messages.push({ side: "user", text: message });
+        item.title = currentTitle;
+        item.agentId = agentId;
+        item.agentName = agentName;
+        item.updatedAt = Date.now();
+        saveHistory(listBefore);
+        renderHistoryList();
+
+        try {
+          // 无 session → 自动创建
+          let sessionId = currentSessionId;
+          if (!sessionId) {
+            sessionId = await createSession(agentId);
+          }
+
+          const reply = await chat(agentId, sessionId, message);
+          agentBubble.innerHTML = escapeHtml(reply || "(空响应)");
+
+          // 写回助手消息 + sessionId
+          upsertCurrentHistory({
+            sessionId,
+            agentId,
+            agentName,
+            title: currentTitle,
+            messages: [...item.messages, { side: "agent", text: reply || "(空响应)" }],
+          });
+
+          setStatus("已完成");
+        } catch (err) {
+          const msg = err && err.message ? err.message : "请求失败";
+          if (isBackendUnavailableError(err)) showBackendModal(err);
+          agentBubble.innerHTML = escapeHtml(`请求失败：${msg}`);
+          setStatus(`失败：${msg}`, "error");
+        } finally {
+          setSending(false);
+          scrollToBottom();
+          dom.message.focus();
+        }
+      });
+
+      dom.backendRetryBtn.addEventListener("click", async () => {
+        setBackendModalVisible(false);
+        setStatus("正在重试连接服务端…");
+        try {
+          await loadAgents();
+          setStatus("服务端已可用，已加载智能体列表。");
+        } catch (err) {
+          const msg = err && err.message ? err.message : "重试失败";
+          dom.agentSelect.innerHTML = `<option value="">加载失败</option>`;
+          setStatus(`重试失败：${msg}`, "error");
+          if (isBackendUnavailableError(err)) showBackendModal(err);
+        }
+      });
+
+      // =========================
+      // 7. 启动
+      // =========================
+      (async function boot() {
+        renderHistoryList();
+        updateSendBtnState();
+        try {
+          await loadAgents();
+          setStatus("已加载智能体列表");
+        } catch (err) {
+          const msg = err && err.message ? err.message : "加载失败";
+          dom.agentSelect.innerHTML = `<option value="">加载失败</option>`;
+          setStatus(`智能体列表加载失败：${msg}`, "error");
+          if (isBackendUnavailableError(err)) showBackendModal(err);
+        }
+      })();
+    </script>
+  </body>
+</html>

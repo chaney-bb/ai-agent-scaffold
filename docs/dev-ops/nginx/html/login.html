@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaney Agent · 登录</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 与对话页统一的白底极简风格 */
+      :root {
+        --bg: #f5f5f5;
+        --panel: #ffffff;
+        --ink: #1a1a1a;
+        --muted: #8c8c8c;
+        --line: #ebebeb;
+        --danger: #d4380d;
+        --font: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font);
+        color: var(--ink);
+        background: var(--bg);
+      }
+
+      .page {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 28px 16px;
+      }
+
+      .card {
+        width: min(420px, 100%);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 32px 28px 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+
+      .logo-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: var(--ink);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 15px;
+      }
+
+      .brand span {
+        display: block;
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .hint {
+        margin: 0 0 22px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 11px 12px;
+        font: inherit;
+        outline: none;
+        background: #fff;
+      }
+
+      input:focus {
+        border-color: #bbb;
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .btn-secondary {
+        background: #f0f0f0;
+        color: var(--ink);
+      }
+
+      .msg {
+        min-height: 18px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .msg.error {
+        color: var(--danger);
+      }
+
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 11px;
+        color: #b0b0b0;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      登录页：演示账号 admin/admin，写入 Cookie ai_agent_login 后跳转 index.html
+      user 字段会作为对话接口的 userId
+    -->
+    <main class="page">
+      <div class="card">
+        <div class="brand">
+          <div class="logo-mark" aria-hidden="true">C</div>
+          <div>
+            <strong>Chaney Agent</strong>
+            <span>会话工作室</span>
+          </div>
+        </div>
+
+        <h1>登录</h1>
+        <p class="hint">演示账号 admin / admin。登录态保存在浏览器 Cookie。</p>
+
+        <form id="loginForm" autocomplete="on">
+          <div class="row">
+            <label for="username">账号</label>
+            <input id="username" name="username" type="text" placeholder="请输入账号" autocomplete="username" />
+          </div>
+          <div class="row">
+            <label for="password">密码</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit">进入</button>
+            <button class="btn btn-secondary" type="button" id="fillDemo">填充演示账号</button>
+          </div>
+          <div class="msg" id="msg" role="status" aria-live="polite"></div>
+        </form>
+        <div class="footer">第 2-19 节 · 会话服务接口对接 UI</div>
+      </div>
+    </main>
+
+    <script>
+      const COOKIE_NAME = "ai_agent_login";
+      const COOKIE_DAYS = 7;
+
+      function setCookie(name, value, days) {
+        const maxAge = Math.max(0, Math.floor(days * 86400));
+        document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+      }
+
+      function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split("; ") : [];
+        for (const item of cookies) {
+          const eqIndex = item.indexOf("=");
+          const k = eqIndex >= 0 ? item.slice(0, eqIndex) : item;
+          const v = eqIndex >= 0 ? item.slice(eqIndex + 1) : "";
+          if (k === name) return decodeURIComponent(v);
+        }
+        return null;
+      }
+
+      function safeParseJson(text) {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      }
+
+      const dom = {
+        form: document.getElementById("loginForm"),
+        username: document.getElementById("username"),
+        password: document.getElementById("password"),
+        msg: document.getElementById("msg"),
+        fillDemo: document.getElementById("fillDemo"),
+      };
+
+      function setMessage(text, type) {
+        dom.msg.textContent = text || "";
+        dom.msg.classList.toggle("error", type === "error");
+      }
+
+      function bootFromCookie() {
+        const raw = getCookie(COOKIE_NAME);
+        if (!raw) return;
+        const payload = safeParseJson(raw);
+        if (!payload || !payload.user) return;
+        window.location.replace("./index.html");
+      }
+
+      dom.fillDemo.addEventListener("click", () => {
+        dom.username.value = "admin";
+        dom.password.value = "admin";
+        setMessage("已填充演示账号。");
+        dom.password.focus();
+      });
+
+      dom.form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        setMessage("");
+        const username = (dom.username.value || "").trim();
+        const password = dom.password.value || "";
+        if (!username || !password) {
+          setMessage("请输入账号与密码。", "error");
+          return;
+        }
+        if (username !== "admin" || password !== "admin") {
+          setMessage("账号或密码错误（演示账号：admin / admin）。", "error");
+          return;
+        }
+        setCookie(COOKIE_NAME, JSON.stringify({ user: username, ts: Date.now() }), COOKIE_DAYS);
+        setMessage("登录成功，正在跳转…");
+        window.location.replace("./index.html");
+      });
+
+      bootFromCookie();
+    </script>
+  </body>
+</html>
