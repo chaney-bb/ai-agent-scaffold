@@ -16,7 +16,7 @@ public interface IAgentService {
     /** 查询已装配的智能体配置列表 */
     Response<List<AiAgentConfigResponseDTO>> queryAiAgentConfigList();
 
-    /** 按 agentId + userId 创建会话，返回 sessionId */
+    /** 按 agentId + userId 新建会话（每次调用都新建），返回 sessionId */
     Response<CreateSessionResponseDTO> createSession(CreateSessionRequestDTO requestDTO);
 
     /** 同步对话；sessionId 为空时内部先建会话 */

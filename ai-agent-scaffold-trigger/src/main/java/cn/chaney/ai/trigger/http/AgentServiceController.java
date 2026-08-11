@@ -66,8 +66,8 @@ public class AgentServiceController implements IAgentService {
         }
     }
 
-    /** GET：创建会话（body：agentId、userId） */
-    @RequestMapping(value = "create_session", method = RequestMethod.GET)
+    /** 创建会话（body：agentId、userId）；每次调用新建 sessionId */
+    @RequestMapping(value = "create_session", method = RequestMethod.POST)
     @Override
     public Response<CreateSessionResponseDTO> createSession(@RequestBody CreateSessionRequestDTO requestDTO) {
         try {

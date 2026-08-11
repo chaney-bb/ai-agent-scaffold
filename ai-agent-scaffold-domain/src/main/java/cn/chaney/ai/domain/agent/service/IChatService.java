@@ -2,6 +2,7 @@ package cn.chaney.ai.domain.agent.service;
 
 import cn.chaney.ai.domain.agent.model.entity.ChatCommandEntity;
 import cn.chaney.ai.domain.agent.model.valobj.AiAgentConfigTableVO;
+import cn.chaney.ai.domain.agent.model.valobj.SessionMeta;
 import com.google.adk.events.Event;
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -18,8 +19,11 @@ public interface IChatService {
     /** 查询已配置的智能体列表（供调用方选取 agentId） */
     List<AiAgentConfigTableVO.Agent> queryAiAgentConfigList();
 
-    /** 按 agentId + userId 创建或复用 Session，返回 sessionId */
+    /** 按 agentId + userId 新建 Session（每次调用都新建），返回 sessionId */
     String createSession(String agentId, String userId);
+
+    /** 查询某用户在某智能体下的会话目录（不含 ADK 内消息正文） */
+    List<SessionMeta> listSessions(String agentId, String userId);
 
     /** 无 sessionId：内部建会话后同步处理纯文本 */
     List<String> handleMessage(String agentId, String userId, String message);
